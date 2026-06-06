@@ -202,9 +202,3 @@ classtype:trojan-activity; sid:2000004; rev:1;)
 5. **Segment** network to limit lateral movement if reinfection occurs
 
 ---
-
-## 9. Conclusion
-
-The PCAP analysis of host **GSNTPAWQ (10.0.0.168)** confirmed an active C2 infection. The host communicated with a XAMPP-based C2 server at `103.232.55.148` using unencrypted HTTP. The C2 server served a full web panel (`/dashboard/`) and delivered a malicious executable disguised as the Windows system process `audiodg.exe`. The use of a leading dot and legitimate process name suggests deliberate evasion. The threat actor appears to be using off-the-shelf tooling (XAMPP, standard web panel) rather than advanced custom infrastructure.
-
----
