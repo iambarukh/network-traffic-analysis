@@ -1,11 +1,11 @@
-# 🔍 Network Traffic Analysis — PCAP Investigation
+#  Network Traffic Analysis — PCAP Investigation
 
 
 ##  Project Overview
 
 This project demonstrates hands-on network forensics skills by analyzing real-world malicious network traffic (PCAP files). Using **Wireshark**, I identified active **Command & Control (C2) communication**, a **malware executable download**, and **beaconing behavior** on an infected Windows host.
 
-Custom **Snort IDS rules** were written based on discovered Indicators of Compromise (IOCs), and a professional **incident report** was produced for each investigation — exactly as a SOC Analyst or Incident Responder would do on the job.
+Custom **Snort IDS rules** were written based on discovered Indicators of Compromise (IOCs), and a professional **incident report** was produced for each investigation, exactly as a SOC Analyst or Incident Responder would do on the job.
 
 ---
 
@@ -27,18 +27,18 @@ Custom **Snort IDS rules** were written based on discovered Indicators of Compro
 ```
 network-traffic-analysis/
 │
-├── 📄 README.md                              
+├──  README.md                              
 │
-├── 📁 pcap-files/
+├──  pcap-files/
 │   └── 2021-09-14.pcap
 │                      
-├── 📁 snort-rules/
+├──  snort-rules/
 │   ├── detection-rules.rules                                            
 │
-├── 📁 incident-reports/
+├──  incident-reports/
 │   ├── IR-001-GSNTPAWQ-C2-Investigation.md              
 │
-└── 📁 screenshots/                           
+└──  screenshots/                           
     ├── 01-traffic-overview.png
     ├── 02-protocol-hierarchy.png
     ├── 03-conversations.png
@@ -53,9 +53,9 @@ network-traffic-analysis/
 
 ---
 
-## 🔬 Investigation Summary — IR-001
+##  Investigation Summary — IR-001
 
-> **PCAP:** `2021-09-14.pcap` | **Date:** September 14, 2021 | **Severity:**  HIGH
+> **PCAP:** `2021-09-14.pcap`| **Severity:**  HIGH
 
 ### What Was Found
 
@@ -144,5 +144,3 @@ classtype:trojan-activity; sid:2000003; rev:1;)
 | 10 | Malicious URL | GET /dashboard/ with Referer: /service/ |
 
 ---
-on cybersecurity portfolio — real traffic, real tools, real findings.</i>
-</div>
