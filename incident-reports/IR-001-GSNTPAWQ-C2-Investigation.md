@@ -1,4 +1,4 @@
-# 🚨 Incident Report IR-001
+#  Incident Report IR-001
 ## C2 Communication & Malware Download — Host GSNTPAWQ
 
 | Field | Details |
@@ -6,9 +6,9 @@
 | **Report ID** | IR-001 |
 | **Date of Analysis** | June 06, 2026 |
 | **PCAP File** | 1.pcap (2021-09-14.pcap) |
-| **Analyst** | [Your Name] |
-| **Severity** | 🔴 HIGH |
-| **Status** | ✅ Complete |
+| **Analyst** | BARUKH ASWAD |
+| **Severity** |  HIGH |
+| **Status** |  Complete |
 
 ---
 
@@ -52,12 +52,12 @@ On **September 14, 2021 at 14:32:16 UTC**, a Windows host named **GSNTPAWQ** (IP
 
 ## 4. Indicators of Compromise (IOCs)
 
-### 🌐 Malicious IP Addresses
+###  Malicious IP Addresses
 ```
 103.232.55.148    # Primary C2 Server (HTTP Port 80)
 ```
 
-### 🔗 Malicious URLs
+###  Malicious URLs
 ```
 http://103.232.55.148/service/
 http://103.232.55.148/dashboard/
@@ -68,7 +68,7 @@ http://103.232.55.148/dashboard/javascripts/all.js
 http://103.232.55.148/dashboard/javascripts/modernizr.js
 ```
 
-### 🖥️ Malicious File
+###  Malicious File
 ```
 Filename:   .audiodg.exe
 Source:     http://103.232.55.148/service/.audiodg.exe
@@ -76,7 +76,7 @@ Note:       Disguised as legitimate Windows Audio Device Graph process
             Hidden with leading dot (.) — Unix-style file hiding technique
 ```
 
-### 📡 C2 Server Fingerprint
+###  C2 Server Fingerprint
 ```
 Server:       Apache/2.4.47 (Win64) OpenSSL/1.1.1k PHP/7.3.28
 Framework:    XAMPP (Windows) — bitnami-xampp.png confirmed
@@ -84,7 +84,7 @@ Date:         Tue, 14 Sep 2021 14:32:24 GMT
 Port:         80 (HTTP — unencrypted)
 ```
 
-### 🔍 Suspicious User-Agent
+###  Suspicious User-Agent
 ```
 Mozilla/5.0 (Windows NT 10.0; WOW64; Trident/7.0; rv:11.0) like Gecko
 Note: Internet Explorer 11 User-Agent — may be malware spoofing browser
@@ -180,21 +180,21 @@ classtype:trojan-activity; sid:2000004; rev:1;)
 
 ## 8. Recommendations
 
-### ⚡ Immediate (Within 24 Hours)
+###  Immediate (Within 24 Hours)
 1. **Isolate** host `10.0.0.168` (GSNTPAWQ) from the network immediately
 2. **Block** IP `103.232.55.148` at the firewall — all ports
 3. **Preserve** the PCAP file as forensic evidence
 4. **Investigate** if `.audiodg.exe` was executed on the host
 5. **Check** for persistence mechanisms (registry run keys, scheduled tasks)
 
-### 🔧 Short-Term (Within 1 Week)
+###  Short-Term (Within 1 Week)
 1. **Reimage** the infected host — do not trust it after EXE download
 2. **Scan** all other hosts on 10.0.0.0/24 for similar C2 traffic
 3. **Reset** all passwords that may have been accessible on GSNTPAWQ
 4. **Deploy** the 4 Snort rules from Section 6 to the network IDS
 5. **Check** Windows Event Logs on GSNTPAWQ for process execution
 
-### 🛡️ Long-Term
+###  Long-Term
 1. **Implement** web filtering to block direct IP connections (no-domain HTTP)
 2. **Enable** full DNS logging to catch future beaconing
 3. **Deploy** EDR (Endpoint Detection and Response) on all Windows hosts
@@ -208,6 +208,3 @@ classtype:trojan-activity; sid:2000004; rev:1;)
 The PCAP analysis of host **GSNTPAWQ (10.0.0.168)** confirmed an active C2 infection. The host communicated with a XAMPP-based C2 server at `103.232.55.148` using unencrypted HTTP. The C2 server served a full web panel (`/dashboard/`) and delivered a malicious executable disguised as the Windows system process `audiodg.exe`. The use of a leading dot and legitimate process name suggests deliberate evasion. The threat actor appears to be using off-the-shelf tooling (XAMPP, standard web panel) rather than advanced custom infrastructure.
 
 ---
-
-*Report generated as part of Network Traffic Analysis Portfolio Project*
-*PCAP Source: 2021-09-14.pcap | Analysis Tool: Wireshark 4.x*
