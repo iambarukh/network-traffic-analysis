@@ -1,0 +1,236 @@
+# ============================================================
+# Custom Snort Detection Rules
+# Project: Network Traffic Analysis — PCAP Investigation
+# Author: [Your Name]
+# Date: [Date]
+# ============================================================
+# 
+# HOW TO USE THESE RULES:
+# 1. Save this file as: local.rules
+# 2. Add to snort.conf: include $RULE_PATH/local.rules
+# 3. Run Snort: snort -c /etc/snort/snort.conf -r [pcap-file.pcap]
+#
+# RULE FORMAT:
+# action protocol src_ip src_port -> dst_ip dst_port (options)
+# ============================================================
+
+
+# ============================================================
+# SECTION 1: C2 (Command & Control) Communication Detection
+# ============================================================
+
+# Rule 1.1: Detect HTTP POST to known C2 server
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 \
+(msg:"C2 COMMUNICATION HTTP POST Suspicious"; \
+flow:established,to_server; \
+content:"POST"; http_method; \
+content:"/gate.php"; http_uri; \
+classtype:trojan-activity; \
+sid:1000001; rev:1;)
+
+# Rule 1.2: Detect C2 beaconing (regular interval connections)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any \
+(msg:"C2 BEACON Regular Interval Connection"; \
+flow:established,to_server; \
+detection_filter:track by_src, count 10, seconds 60; \
+classtype:trojan-activity; \
+sid:1000002; rev:1;)
+
+# Rule 1.3: Detect suspicious User-Agent (old/fake browser)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 \
+(msg:"SUSPICIOUS Old Internet Explorer User-Agent - Possible Malware"; \
+flow:established,to_server; \
+content:"User-Agent|3a 20|Mozilla/4.0 (compatible|3b| MSIE 6.0)"; http_header; \
+classtype:policy-violation; \
+sid:1000003; rev:1;)
+
+
+# ============================================================
+# SECTION 2: Data Exfiltration Detection
+# ============================================================
+
+# Rule 2.1: Detect large outbound HTTP POST (possible data theft)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 \
+(msg:"EXFILTRATION Large Outbound POST Request"; \
+flow:established,to_server; \
+content:"POST"; http_method; \
+dsize:>100000; \
+classtype:data-theft; \
+sid:1000004; rev:1;)
+
+# Rule 2.2: Detect Base64 encoded data in POST (common exfiltration technique)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 \
+(msg:"EXFILTRATION Base64 Encoded Data in POST Body"; \
+flow:established,to_server; \
+content:"POST"; http_method; \
+content:"Content-Type: application/x-www-form-urlencoded"; http_header; \
+pcre:"/[A-Za-z0-9+\/]{100,}={0,2}/P"; \
+classtype:data-theft; \
+sid:1000005; rev:1;)
+
+# Rule 2.3: Detect FTP exfiltration (unusual outbound FTP)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 21 \
+(msg:"EXFILTRATION Suspicious Outbound FTP Connection"; \
+flow:established,to_server; \
+classtype:data-theft; \
+sid:1000006; rev:1;)
+
+
+# ============================================================
+# SECTION 3: Port Scan Detection
+# ============================================================
+
+# Rule 3.1: Detect TCP SYN scan
+alert tcp $EXTERNAL_NET any -> $HOME_NET any \
+(msg:"PORT SCAN TCP SYN Scan Detected"; \
+flags:S,12; \
+detection_filter:track by_src, count 20, seconds 10; \
+classtype:network-scan; \
+sid:1000007; rev:1;)
+
+# Rule 3.2: Detect NULL scan (all flags off — used to evade detection)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any \
+(msg:"PORT SCAN TCP NULL Scan Detected"; \
+flags:0; \
+classtype:network-scan; \
+sid:1000008; rev:1;)
+
+# Rule 3.3: Detect XMAS scan (FIN, PSH, URG flags set)
+alert tcp $EXTERNAL_NET any -> $HOME_NET any \
+(msg:"PORT SCAN TCP XMAS Scan Detected"; \
+flags:FPU; \
+classtype:network-scan; \
+sid:1000009; rev:1;)
+
+
+# ============================================================
+# SECTION 4: DNS Anomalies & Tunneling Detection
+# ============================================================
+
+# Rule 4.1: Detect DNS queries to suspicious TLDs
+alert udp $HOME_NET any -> any 53 \
+(msg:"DNS Suspicious TLD Query - .ru Domain"; \
+content:"|02|ru|00|"; \
+classtype:policy-violation; \
+sid:1000010; rev:1;)
+
+# Rule 4.2: Detect DNS tunneling (unusually long DNS query)
+alert udp $HOME_NET any -> any 53 \
+(msg:"DNS TUNNEL Unusually Long DNS Query - Possible Tunneling"; \
+dsize:>100; \
+classtype:policy-violation; \
+sid:1000011; rev:1;)
+
+# Rule 4.3: Detect high-frequency DNS queries (DGA malware)
+alert udp $HOME_NET any -> any 53 \
+(msg:"DNS HIGH FREQUENCY Queries - Possible DGA Malware"; \
+detection_filter:track by_src, count 50, seconds 60; \
+classtype:policy-violation; \
+sid:1000012; rev:1;)
+
+
+# ============================================================
+# SECTION 5: Malware-Specific Rules
+# ============================================================
+
+# Rule 5.1: Detect Emotet malware C2 communication pattern
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 \
+(msg:"MALWARE Emotet C2 Communication Pattern"; \
+flow:established,to_server; \
+content:"POST"; http_method; \
+pcre:"/\/[a-zA-Z0-9]{4,8}\/(index\.php|gate\.php|update\.php)/U"; \
+classtype:trojan-activity; \
+sid:1000013; rev:1;)
+
+# Rule 5.2: Detect Cobalt Strike beacon (common pentesting/malware tool)
+alert tcp $HOME_NET any -> $EXTERNAL_NET any \
+(msg:"MALWARE Cobalt Strike Beacon Pattern"; \
+flow:established,to_server; \
+content:"|00 00 be ef|"; \
+classtype:trojan-activity; \
+sid:1000014; rev:1;)
+
+# Rule 5.3: Detect PowerShell download cradle (malware delivery)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 80 \
+(msg:"MALWARE PowerShell Download Cradle Detected"; \
+flow:established,to_server; \
+content:"powershell"; nocase; \
+content:"DownloadString"; nocase; distance:0; \
+classtype:trojan-activity; \
+sid:1000015; rev:1;)
+
+
+# ============================================================
+# SECTION 6: General Suspicious Activity
+# ============================================================
+
+# Rule 6.1: Detect connection to Tor exit nodes (port 9001, 9030)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 9001 \
+(msg:"TOR Exit Node Connection Detected - Port 9001"; \
+flow:established,to_server; \
+classtype:policy-violation; \
+sid:1000016; rev:1;)
+
+# Rule 6.2: Detect IRC traffic (often used by botnets)
+alert tcp $HOME_NET any -> $EXTERNAL_NET 6667 \
+(msg:"IRC TRAFFIC Botnet C2 via IRC Possible"; \
+flow:established,to_server; \
+content:"NICK "; \
+content:"USER "; distance:0; \
+classtype:trojan-activity; \
+sid:1000017; rev:1;)
+
+# Rule 6.3: Detect ICMP exfiltration (data hidden in ping packets)
+alert icmp $HOME_NET any -> $EXTERNAL_NET any \
+(msg:"ICMP EXFILTRATION Large ICMP Packet - Possible Covert Channel"; \
+dsize:>100; \
+itype:8; \
+classtype:data-theft; \
+sid:1000018; rev:1;)
+
+# ============================================================
+# END OF RULES
+# Total Rules: 18
+# Last Updated: [Date]
+# ============================================================
+
+
+# ============================================================
+# SECTION 7: IR-001 Specific Rules (GSNTPAWQ Investigation)
+# Based on actual IOCs found in 1.pcap analysis
+# ============================================================
+
+# Rule IR-001-1: Block specific C2 server IP
+alert tcp $HOME_NET any -> 103.232.55.148 any \
+(msg:"IR-001 KNOWN C2 IP 103.232.55.148 Connection"; \
+classtype:trojan-activity; sid:2000001; rev:1;)
+
+# Rule IR-001-2: Detect C2 /service/ checkin
+alert tcp $HOME_NET any -> 103.232.55.148 80 \
+(msg:"IR-001 C2 CHECKIN GET /service/"; \
+flow:established,to_server; \
+content:"GET"; http_method; \
+content:"/service/"; http_uri; \
+classtype:trojan-activity; sid:2000002; rev:1;)
+
+# Rule IR-001-3: Detect C2 dashboard access
+alert tcp $HOME_NET any -> 103.232.55.148 80 \
+(msg:"IR-001 C2 PANEL GET /dashboard/"; \
+flow:established,to_server; \
+content:"GET"; http_method; \
+content:"/dashboard/"; http_uri; \
+classtype:trojan-activity; sid:2000003; rev:1;)
+
+# Rule IR-001-4: Detect malware EXE download
+alert tcp $HOME_NET any -> 103.232.55.148 80 \
+(msg:"IR-001 MALWARE audiodg.exe download"; \
+flow:established,to_server; \
+content:".audiodg.exe"; http_uri; \
+classtype:trojan-activity; sid:2000004; rev:1;)
+
+# Rule IR-001-5: Detect XAMPP C2 server fingerprint in response
+alert tcp 103.232.55.148 80 -> $HOME_NET any \
+(msg:"IR-001 XAMPP C2 Server Response Detected"; \
+flow:established,to_client; \
+content:"Apache/2.4.47 (Win64)"; http_header; \
+classtype:trojan-activity; sid:2000005; rev:1;)
